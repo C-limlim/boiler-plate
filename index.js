@@ -23,7 +23,7 @@ mongoose.connect(config.mongoURI, {
 
 app.get('/', (req, res) => res.send('hello world everyone'));
 
-app.post('api/users/register', (req, res) => {
+app.post('/api/users/register', (req, res) => {
 	//get data for clients
 	//put data on database
 	const user = new User(req.body)
@@ -36,7 +36,7 @@ app.post('api/users/register', (req, res) => {
 	})
 })
 
-app.post('api/users/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
 	// 요청된 이메일을 데이트베이스에서 찾음
 	// 존재한다면 비밀번호 맞는지 확인
 	// 비밀번호 맞다면 토큰 생성
@@ -69,7 +69,7 @@ app.post('api/users/login', (req, res) => {
 })
 
 //auth: middleware
-app.get('api/users/auth', auth, (req, res) => {
+app.get('/api/users/auth', auth, (req, res) => {
 	res.status(200).json({
 		_id: req.user._id,
 		isAdmin: req.user.role === 0 ? false : true,
@@ -81,6 +81,16 @@ app.get('api/users/auth', auth, (req, res) => {
 		image: req.user.image
 	})
 });
+
+app.get('/api/users/logout', auth, (req, res) => {
+	User.findOneAndUpdate({_id: req.user._id}, 
+		{ token: ""}, (err, user) => {
+			if(err) return res.json({success: false, err});
+			return res.status(200).send({
+				success: true
+			})
+		})
+})
 
 app.listen(port, () => {
 	console.log(`example app listing on port ${port}`);
